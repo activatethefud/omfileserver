@@ -15,6 +15,7 @@
     "editdistance": "^0.2.2",
     "file-saver": "^2.0.5",
     "vue": "^2.6.11",
+    "vue-cli": "^2.9.6",
     "vue-meta": "^2.4.0",
     "vue-upload-component": "^2.8.22"
   },
