@@ -44,10 +44,10 @@
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="torrent in torrents" :key="torrent.name">
+                <tr v-for="(torrent,idx) in torrents" :key="torrent.name">
                     <td scope="row">{{ torrent.name }}</td>
                     <td><a :href="torrent.link" target="_blank">{{ torrent.link }}</a></td>
-                    <td>{{ torrent.likes }} <i style="color: green;" class="fa fa-thumbs-up" aria-hidden="true"></i> / {{ torrent.dislikes }} <i style="color: red" class="fa fa-thumbs-down" aria-hidden="true"></i></td>
+                    <td>{{ torrent.likes }} <i @click="torrents[idx].likes++" style="color: green;" class="fa fa-thumbs-up" aria-hidden="true"></i> / {{ torrent.dislikes }} <i @click="torrents[idx].dislikes++" style="color: red" class="fa fa-thumbs-down" aria-hidden="true"></i></td>
                 </tr>
             </tbody>
         </table>
