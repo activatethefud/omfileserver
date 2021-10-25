@@ -5,24 +5,32 @@
         <div class="btn-group">
             <a @click="uploadModal = true" name="" id="" class="btn btn-primary" href="#" role="button">Upload</a>
 
-            <b-modal v-model="uploadModal" title="File upload">
-                <form class="form">
+            <b-modal hide-footer v-model="uploadModal" title="File upload">
+                <form @submit.prevent="" class="form">
+
                     <div class="form-group">
-                      <label for="">Description</label>
-                      <input type="text" class="form-control" name="" id="" aria-describedby="helpId" placeholder="">
-                      <small id="helpId" class="form-text text-muted">Enter file description</small>
+                      <label for="">Title</label>
+                      <input required minlength="5" v-model="uploadedFileTitle" type="text" name="" id="" class="form-control" placeholder="" aria-describedby="helpId">
+                      <small id="helpId" class="text-muted">Enter file title</small>
                     </div>
 
                     <div class="form-group">
-                      <label for="">Tags</label>
-                      <input type="text" class="form-control" name="" id="" aria-describedby="helpId" placeholder="">
-                      <small id="helpId" class="form-text text-muted">Tags separated by space</small>
+                      <label for="">Description</label>
+                      <textarea required minlength="10" v-model="uploadedFileDescription" class="form-control" name="" id="" rows="3"></textarea>
                     </div>
+
                     <div class="form-group">
                       <label for=""></label>
-                      <input type="file" class="form-control-file" name="" id="" placeholder="" aria-describedby="fileHelpId">
+                      <input @input="changeUploadedFile($event)" type="file" class="form-control-file" name="" id="" placeholder="" aria-describedby="fileHelpId">
                       <small id="fileHelpId" class="form-text text-muted"></small>
                     </div>
+
+                    <div class="form-group">
+                      <label for="">Torrent trackers</label>
+                      <textarea class="form-control" name="" id="" rows="3"></textarea>
+                    </div>
+
+                    <button @click="uploadFile()" type="submit" class="btn btn-primary">Submit</button>
                 </form>
             </b-modal>
 
@@ -59,6 +67,7 @@
 import { torrents } from '../../mock'
 import editdistance from 'editdistance'
 import { saveAs } from 'file-saver'
+import createTorrent from 'create-torrent'
 
 export default {
     name: 'Search',
@@ -67,7 +76,10 @@ export default {
         return {
             searchText: "",
             torrents: torrents,
-            uploadModal: false
+            uploadModal: false,
+            uploadedFileTitle: "",
+            uploadedFileDescription: "",
+            uploadedFile: null,
         }
     },
     created() {
@@ -77,6 +89,52 @@ export default {
     },
 
     methods: {
+
+        uploadFile() {
+            console.log("Uploading",
+                this.uploadedFileTitle,
+                this.uploadedFileDescription,
+                this.uploadedFile
+            );
+
+            const options = {
+                announceList: [
+                    [
+                        'http://p4p.arenabg.com:1337/announce',
+                        'udp://tracker.opentrackr.org:1337/announce',
+                        'udp://9.rarbg.com:2810/announce',
+                        'udp://exodus.desync.com:6969/announce',
+                        'udp://tracker.tiny-vps.com:6969/announce',
+                        'udp://tracker.openbittorrent.com:6969/announce',
+                        'udp://tracker.loadbt.com:6969/announce',
+                        'udp://retracker.lanta-net.ru:2710/announce',
+                        'udp://open.stealth.si:80/announce',
+                        'udp://bt2.archive.org:6969/announce',
+                        'udp://bt1.archive.org:6969/announce',
+                        'https://tracker.nanoha.org:443/announce',
+                        'https://tracker.lilithraws.cf:443/announce',
+                        'https://tracker.iriseden.fr:443/announce',
+                        'https://tracker.iriseden.eu:443/announce',
+                        'https://1337.abcvg.info:443/announce',
+                        'http://tracker1.bt.moack.co.kr:80/announce',
+                        'http://tracker.openbittorrent.com:80/announce',
+                        'http://t.nyaatracker.com:80/announce',
+                        'http://t.acg.rip:6699/announce'
+                    ]
+                ]
+            }
+
+            createTorrent(this.uploadedFile, options, (err,torrent) => {
+                if(!err) {
+                    console.log("Torrent uploading...");
+                    saveAs(new Blob([torrent]), (new Date()).getTime() + '.torrent');
+                }
+            });
+        },
+
+        changeUploadedFile(event) {
+            this.uploadedFile = event.target.files[0];
+        },
 
         exportDb() {
             saveAs(new Blob([JSON.stringify(torrents)]), "db_backup.json");
